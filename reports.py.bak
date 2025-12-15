@@ -1,0 +1,37 @@
+from pathlib import Path
+
+
+def _ensure_fake_html(monkeypatch, tmp_path):
+    """
+    Для view/download html: гарантируем существование файла, который send_file сможет открыть.
+    """
+    import reports
+
+    def _fake_generate(self):
+        reports_dir = tmp_path / "reports"
+        reports_dir.mkdir(parents=True, exist_ok=True)
+        p = reports_dir / "detailed_report_TEST.html"
+        p.write_text("<html><body>TEST</body></html>", encoding="utf-8")
+        return str(p)
+
+    monkeypatch.setattr(reports.ReportGenerator, "generate_detailed_html_report", _fake_generate, raising=True)
+
+
+def _call_generate_csv_any_method(client):
+    """
+    /api/report/generate у тебя может быть POST или GET.
+    Делаем попытку POST, а если 405 — повторяем GET.
+    """
+    resp = client.post("/api/report/generate")
+    if resp.status_code == 405:
+        resp = client.get("/api/report/generate")
+    return resp
+
+
+def test_api_report_generate_csv(client):
+    resp = _call_generate_csv_any_method(client)
+    assert resp.status_code == 200
+
+    # В одних реализациях возвращают JSON, в других — сразу файл.
+    if resp.is_json:
+        data = resp.get_json()

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Отчёт о прохождении курсов</title>
+<style>
+body{font-family:Arial,sans-serif;margin:24px;color:#111}
+.hdr{border-bottom:2px solid #6366f1;padding-bottom:8px;margin-bottom:12px}
+.small{color:#666;font-size:12px}
+table{border-collapse:collapse;width:100%;margin:10px 0 16px}
+th,td{border:1px solid #ddd;padding:6px 8px;font-size:13px}
+th{background:#f3f4f6}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0 14px}
+.card{background:#6366f1;color:#fff;border-radius:8px;padding:12px}
+.card .v{font-size:28px;font-weight:700}
+.pagebreak{page-break-before:always}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <h1>Отчёт о прохождении онлайн‑курсов</h1>
+  <div class="small">Сгенерировано: 15.12.2025 17:01</div>
+</div>
+
+<div class="grid">
+  <div class="card"><div>Сотрудников</div><div class="v">8</div></div>
+  <div class="card" style="background:#f43f5e"><div>Курсов</div><div class="v">8</div></div>
+  <div class="card" style="background:#06b6d4"><div>Регистраций</div><div class="v">13</div></div>
+</div>
+
+<table>
+<tr><th>Показатель</th><th>Значение</th></tr>
+<tr><td>Зачислены</td><td>5</td></tr>
+<tr><td>В процессе</td><td>3</td></tr>
+<tr><td>Завершено</td><td>5</td></tr>
+<tr><td>Процент завершения</td><td>38.5%</td></tr>
+<tr><td>Вовлечённость сотрудников</td><td>100.0%</td></tr>
+<tr><td>Средний прогресс</td><td>48.8%</td></tr>
+<tr><td>Средняя длительность курса</td><td>36.5 ч</td></tr>
+<tr><td>Новых регистраций за 30 дней</td><td>13</td></tr>
+<tr><td>Сотрудников без курсов</td><td>0</td></tr>
+</table>
+
+<div class="pagebreak"></div>
+<h2>Курсы и эвристики</h2>
+
+<table>
+<tr><th>Курс</th><th>Регистраций</th><th>%</th></tr>
+<tr><td>Python для разработчиков</td><td>2</td><td>15.4%</td></tr>
+<tr><td>PostgreSQL и SQL</td><td>2</td><td>15.4%</td></tr>
+<tr><td>Git и CI/CD</td><td>2</td><td>15.4%</td></tr>
+<tr><td>Docker & Kubernetes</td><td>2</td><td>15.4%</td></tr>
+<tr><td>React.js + TypeScript</td><td>2</td><td>15.4%</td></tr>
+<tr><td>DevOps Fundamentals</td><td>2</td><td>15.4%</td></tr>
+<tr><td>JavaScript Advanced</td><td>1</td><td>7.7%</td></tr>
+</table>
+
+<ul>
+  <li>Если процент завершения ниже 40%, стоит пересмотреть сложность/мотивацию.</li>
+  <li>Если вовлечённость ниже 50%, стоит назначить базовые обязательные курсы.</li>
+  <li>Если средний прогресс ниже 50%, стоит добавить напоминания и контрольные точки.</li>
+</ul>
+
+</body>
+</html>

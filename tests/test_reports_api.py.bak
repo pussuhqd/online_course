@@ -1,0 +1,33 @@
+def test_api_report_generate_csv(client):
+    resp = client.post("/api/report/generate")
+    assert resp.status_code in (200, 201)
+
+    data = resp.get_json()
+    assert data is not None
+    assert data.get("status") == "success"
+
+
+def test_api_report_view_html(client):
+    resp = client.get("/api/report/view-html")
+    assert resp.status_code == 200
+    # может быть "text/html; charset=utf-8"
+    assert "text/html" in resp.headers.get("Content-Type", "")
+
+
+def test_api_report_download_html(client):
+    resp = client.get("/api/report/download-html")
+    assert resp.status_code == 200
+    assert "text/html" in resp.headers.get("Content-Type", "")
+    cd = resp.headers.get("Content-Disposition", "")
+    assert "attachment" in cd.lower()
+    assert ".html" in cd.lower()
+
+
+def test_api_report_recommendations(client):
+    resp = client.get("/api/report/recommendations")
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert isinstance(data, list)
+    assert len(data) >= 1
+    assert "title" in data[0]
+    assert "description" in data[0]

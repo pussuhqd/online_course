@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Система учёта онлайн-курсов</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #0891b2;
+            --light: #f3f4f6;
+            --dark: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--dark);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            border-radius: 10px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #666;
+        }
+
+        nav {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            color: var(--dark);
+        }
+
+        nav button:hover {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        nav button.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .content {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .card h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .card.success .value { color: var(--success); }
+        .card.warning .value { color: var(--warning); }
+        .card.danger .value { color: var(--danger); }
+        .card.info .value { color: var(--info); }
+
+        form {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        form h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: var(--light);
+            color: var(--dark);
+            border: 2px solid var(--border);
+        }
+
+        button.secondary:hover {
+            background: var(--border);
+        }
+
+        button.danger {
+            background: var(--danger);
+        }
+
+        button.danger:hover {
+            background: #dc2626;
+        }
+
+        button.success {
+            background: var(--success);
+        }
+
+        button.success:hover {
+            background: #059669;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge.enrolled {
+            background: #dbeafe;
+            color: #0c4a6e;
+        }
+
+        .badge.in_progress {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge.completed {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .badge.deleted {
+            background: #fee2e2;
+            color: #7f1d1d;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            transition: width 0.3s;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+
+        .alert.success {
+            background: #ecfdf5;
+            border-color: var(--success);
+            color: #065f46;
+        }
+
+        .alert.error {
+            background: #fef2f2;
+            border-color: var(--danger);
+            color: #7f1d1d;
+        }
+
+        .alert.info {
+            background: #eff6ff;
+            border-color: var(--primary);
+            color: #082f49;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-close:hover {
+            color: var(--dark);
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .recommendations {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .recommendation-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .recommendation-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .recommendation-title {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .recommendation-description {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-percent {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            header h1 {
+                font-size: 20px;
+            }
+
+            nav {
+                gap: 10px;
+            }
+
+            nav button {
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            td, th {
+                padding: 10px 5px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn-small {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Система учёта прохождения онлайн-курсов</h1>
+            <p>Управление и отслеживание корпоративного обучения персонала</p>
+            
+            <nav>
+                <button class="nav-btn active" data-tab="dashboard">📊 Дашборд</button>
+                <button class="nav-btn" data-tab="employees">👥 Сотрудники</button>
+                <button class="nav-btn" data-tab="courses">📖 Курсы</button>
+                <button class="nav-btn" data-tab="registrations">✏️ Регистрации</button>
+                <button class="nav-btn" data-tab="reports">📈 Отчёты</button>
+                <button class="nav-btn" data-tab="deleted">🗑️ Удаленные</button>
+            </nav>
+        </header>
+
+        <!-- DASHBOARD TAB -->
+        <div id="dashboard" class="content active">
+            <div id="statsContainer" class="stats-container"></div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div class="card">
+                    <h3>Распределение по статусам</h3>
+                    <div id="statusChart"></div>
+                </div>
+                <div class="card">
+                    <h3>Топ 5 популярных курсов</h3>
+                    <div id="courseChart"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EMPLOYEES TAB -->
+        <div id="employees" class="content">
+            <form id="employeeForm">
+                <h2>Добавить нового сотрудника</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>ФИО *</label>
+                        <input type="text" id="empName" required placeholder="Иван Иванов">
+                    </div>
+                    <div class="form-group">
+                        <label>Номер телефона *</label>
+                        <input type="tel" id="empPhone" required placeholder="+7 (999) 123-45-67">
+                    </div>
+                    <div class="form-group">
+                        <label>Должность *</label>
+                        <select id="empPosition" required>
+                            <option value="">Выберите должность</option>
+                            <option value="Аналитик">Аналитик</option>
+                            <option value="Разработчик">Разработчик</option>
+                            <option value="Тестировщик">Тестировщик</option>
+                            <option value="Менеджер проекта">Менеджер проекта</option>
+                            <option value="Системный администратор">Системный администратор</option>
+                            <option value="Дизайнер">Дизайнер</option>
+                            <option value="Архитектор ПО">Архитектор ПО</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit">➕ Добавить сотрудника</button>
+            </form>
+
+            <div class="search-box">
+                <input type="text" id="empSearch" placeholder="Поиск по ФИО или номеру телефона...">
+                <button onclick="searchEmployees()">🔍 Найти</button>
+            </div>
+
+            <div id="employeeAlert"></div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ФИО</th>
+                            <th>Должность</th>
+                            <th>Номер телефона</th>
+                            <th>Дата добавления</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employeesList"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- COURSES TAB -->
+        <div id="courses" class="content">
+            <form id="courseForm">
+                <h2>Добавить новый курс</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Название курса *</label>
+                        <input type="text" id="courseName" required placeholder="Python для начинающих">
+                    </div>
+                    <div class="form-group">
+                        <label>Длительность (часов) *</label>
+                        <input type="number" id="courseDuration" min="1" max="10000" required placeholder="40">
+                    </div>
+                    <div class="form-group">
+                        <label>Документ о завершении *</label>
+                        <select id="certificateType" required>
+                            <option value="">Выберите тип документа</option>
+                            <option value="Диплом">Диплом</option>
+                            <option value="Сертификат">Сертификат</option>
+                            <option value="Удостоверение">Удостоверение</option>
+                            <option value="Свидетельство">Свидетельство</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit">➕ Добавить курс</button>
+            </form>
+
+            <div id="courseAlert"></div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Длительность (ч)</th>
+                            <th>Документ</th>
+                            <th>Дата создания</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="coursesList"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- REGISTRATIONS TAB -->
+        <div id="registrations" class="content">
+            <form id="registrationForm">
+                <h2>Зачислить сотрудника на курс</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Выберите сотрудника *</label>
+                        <select id="regEmployee" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Выберите курс *</label>
+                        <select id="regCourse" required></select>
+                    </div>
+                </div>
+                <button type="submit">✅ Зачислить на курс</button>
+            </form>
+
+            <div id="registrationAlert"></div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Сотрудник</th>
+                            <th>Курс</th>
+                            <th>Статус</th>
+                            <th>Прогресс</th>
+                            <th>Дата регистрации</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="registrationsList"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- REPORTS TAB -->
+        <div id="reports" class="content">
+            <div class="recommendations">
+                <h2 style="color: var(--primary); margin-bottom: 20px;">💡 Рекомендации по улучшению</h2>
+                <div id="recommendationsContainer"></div>
+            </div>
+
+            <div style="background: white; border-radius: 10px; padding: 25px; margin-top: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h2 style="color: var(--primary); margin-bottom: 20px;">📥 Экспорт данных</h2>
+                <button onclick="downloadReport()" class="btn btn-primary">📊 CSV отчёт</button>
+                <button onclick="viewHtmlReport()" class="btn btn-success" style="margin-left: 10px;">📄 Просмотр</button>
+                <button onclick="downloadHtmlReport()" class="btn btn-info" style="margin-left: 10px;">⬇️ Скачать HTML</button>
+                <button onclick="location.reload()" class="secondary">🔄 Обновить данные</button>
+            </div>
+        </div>
+
+        <!-- DELETED TAB -->
+        <div id="deleted" class="content">
+            <div style="margin-bottom: 20px;">
+                <h2 style="color: var(--primary); margin-bottom: 10px;">Удаленные записи</h2>
+                <p style="color: #666; margin-bottom: 20px;">Здесь отображаются все удаленные сотрудники, курсы и регистрации</p>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <h3 style="color: var(--dark); margin-bottom: 15px;">👥 Удаленные сотрудники</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>ФИО</th>
+                                <th>Должность</th>
+                                <th>Номер телефона</th>
+                                <th>Дата удаления</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deletedEmployeesList"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <h3 style="color: var(--dark); margin-bottom: 15px;">📖 Удаленные курсы</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Название</th>
+                                <th>Длительность (ч)</th>
+                                <th>Дата удаления</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deletedCoursesList"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                <h3 style="color: var(--dark); margin-bottom: 15px;">✏️ Удаленные регистрации</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Сотрудник</th>
+                                <th>Курс</th>
+                                <th>Статус</th>
+                                <th>Дата удаления</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deletedRegistrationsList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/app.js"></script>
+</body>
+</html>
