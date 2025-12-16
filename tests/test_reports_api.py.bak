@@ -7,7 +7,6 @@ def test_api_report_generate_csv(client):
     assert data.get("status") == "success"
 
 
-def test_api_report_view_html(client):
     resp = client.get("/api/report/view-html")
     assert resp.status_code == 200
     # может быть "text/html; charset=utf-8"

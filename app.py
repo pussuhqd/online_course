@@ -131,16 +131,83 @@ class Registration(db.Model):
 VALID_POSITIONS = ['Аналитик', 'Разработчик', 'Тестировщик', 'Менеджер проекта', 
                    'Системный администратор', 'Дизайнер', 'Архитектор ПО']
 
+import re
+
 def validate_phone(phone):
-    """Валидация номера телефона"""
-    phone = phone.replace('+', '').replace('-', '').replace(' ', '').replace('(', '').replace(')', '')
-    return phone.isdigit() and len(phone) >= 10
+    """Валидация номера телефона. Допустимый вид: +79329344747"""
+    if not isinstance(phone, str):
+        return False
+
+    s = phone.strip()
+
+    # Разрешаем только один ведущий '+' (если он есть)
+    # и убираем все разделители: пробелы, скобки, дефисы и т.п.
+    if s.count('+') > 1:
+        return False
+
+    if s.startswith('+'):
+        digits = re.sub(r"\D", "", s)  # оставляем только цифры [web:43]
+    else:
+        # Если нет плюса — всё равно чистим, но дальше будем требовать формат +7...
+        digits = re.sub(r"\D", "", s)  # [web:43]
+
+    # Строго: 11 цифр, первая — 7 (т.е. +7XXXXXXXXXX)
+    if len(digits) != 11:
+        return False
+    if not digits.isdigit():
+        return False
+    if not digits.startswith('7'):
+        return False
+
+    # Дополнительно (опционально, но полезно): второй символ для мобильных РФ обычно '9'
+    # Если хотите принимать и городские +7 (495...), закомментируйте следующую строку.
+    # if digits[1] != '9':
+    #     return False
+
+    # Если пользователь ввёл без '+', всё равно считаем валидным только если это именно +7...
+    # (т.е. "79329344747" пройдёт, но "892..." — нет)
+    return True
+
+
+import re
+
+# Unicode-буква (без цифр и "_"): \w включает цифры и "_", поэтому используем класс [^\W\d_] [web:43][web:44]
+_LETTER = r"[^\W\d_]"
+_PART_RE = re.compile(rf"^{_LETTER}+(?:-{_LETTER}+)*$", flags=re.UNICODE)
 
 def validate_full_name(full_name):
-    """Валидация ФИО"""
-    if not full_name or len(full_name) < 3:
+    """Валидация ФИО (Фамилия Имя Отчество), возвращает bool."""
+    # Тип/пустота
+    if not isinstance(full_name, str):
         return False
-    return all(c.isalpha() or c.isspace() for c in full_name)
+
+    # Нормализация пробелов: убираем края и схлопываем множественные пробелы в один
+    normalized = " ".join(full_name.strip().split())
+    if len(normalized) < 3:
+        return False
+
+    # Ровно 3 части (логика как у вас: split -> 3 слова)
+    parts = normalized.split(" ")
+    if len(parts) != 3:
+        return False
+
+    # Ограничения по длине (защита от мусора/очень длинного ввода)
+    # Можно подстроить, но они безопасны и обычно не мешают реальным ФИО.
+    if len(normalized) > 120:
+        return False
+
+    for part in parts:
+        # Минимум 2 буквы в каждой части (чтобы отсечь "И И О")
+        if len(part) < 2 or len(part) > 40:
+            return False
+
+        # Запрещаем дефис в начале/конце и двойные дефисы (это также отсекает пустые сегменты)
+        # Основная проверка: только буквы и одиночные дефисы между ними
+        if not _PART_RE.match(part):
+            return False
+
+    return True
+
 
 def validate_position(position):
     """Валидация должности"""
